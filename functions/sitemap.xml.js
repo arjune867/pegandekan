@@ -9,7 +9,7 @@ export async function onRequestGet({ request, env }) {
   }
   const urls = [
     `<url><loc>${escapeXml(origin + "/")}</loc><changefreq>hourly</changefreq><priority>1.0</priority></url>`,
-    ...["tentang-kami","kontak-redaksi","kebijakan-privasi","pedoman-media-siber","disclaimer","koreksi-dan-hak-jawab","sitemap"].map(slug => `<url><loc>${escapeXml(origin + "/" + slug + "/")}</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>`),
+    ...["tentang-kami","kontak-redaksi","kebijakan-privasi","pedoman-media-siber","disclaimer","koreksi-dan-hak-jawab","syarat-ketentuan","sitemap"].map(slug => `<url><loc>${escapeXml(origin + "/" + slug + "/")}</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>`),
     ...rows.map(row => `<url><loc>${escapeXml(origin + "/artikel/" + encodeURIComponent(row.slug) + "/")}</loc><lastmod>${escapeXml(new Date(row.updated).toISOString().slice(0,10))}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`)
   ];
   return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join("")}</urlset>`, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" } });

@@ -20,6 +20,7 @@ Di Cloudflare Workers Builds, hubungkan repository `arjune867/pegandekan`, branc
 - Panel redaksi di `public/admin.html`.
 - API publik: `GET /api/articles` dengan filter kategori `?category=daerah`, pencarian `?q=...`, dan pagination `?limit=20&offset=0`.
 - Detail JSON: `GET /api/articles/:slug`.
+- Endpoint publikasi untuk ChatGPT GPT Actions: `POST /api/chat/publish`.
 - Halaman artikel SEO: `/artikel/:slug/`, canonical, Open Graph, dan schema `NewsArticle`.
 - Panel redaksi: buat, edit, draf, terbitkan, dan hapus artikel.
 - Sitemap dinamis: `/sitemap.xml`; robots: `/robots.txt`.
@@ -47,7 +48,21 @@ migrations_dir = "migrations"
 
 Tanpa binding D1, endpoint API berita mengembalikan status 503. Tanpa secret `ADMIN_TOKEN`, panel admin tidak bisa mengelola artikel.
 
-## Alur redaksi
+## Posting langsung lewat ChatGPT
+
+Endpoint khusus untuk GPT Actions tersedia di `/api/chat/publish`. Endpoint ini **langsung menerbitkan** artikel, bukan menyimpannya sebagai draf. Ia menggunakan secret `ADMIN_TOKEN` yang sama dengan panel admin dan membutuhkan D1 aktif.
+
+1. Pastikan D1 dan secret `ADMIN_TOKEN` telah dikonfigurasi dan Worker berhasil di-deploy.
+2. Di ChatGPT, buat atau buka GPT milik Anda di GPT Builder yang mendukung **Actions**.
+3. Tambahkan Action dengan mengimpor spesifikasi [chatgpt-action-openapi.json](./chatgpt-action-openapi.json).
+4. Pada Authentication pilih **API Key**, tipe **Bearer**, lalu masukkan nilai secret `ADMIN_TOKEN`. Jangan menaruh token pada schema atau file GitHub.
+5. Simpan GPT. Gunakan GPT tersebut untuk menulis dan menerbitkan berita.
+
+Properti wajib untuk action: `title`, `body`, dan `thumbnail_url`. `thumbnail_url` harus merupakan URL HTTPS yang dapat diakses publik. Action saat ini menerima URL thumbnail yang sudah di-host; ia **belum mengunggah file gambar ke Cloudflare R2 secara otomatis**. Buat atau siapkan thumbnail, host di layanan gambar yang dapat diakses publik, lalu berikan URL-nya. Periksa fakta, sumber, hak cipta gambar, dan isi artikel sebelum memerintahkan penerbitan. Jangan memasukkan token ke percakapan biasa.
+
+Spesifikasi Action: `chatgpt-action-openapi.json`.
+
+## Alur redaksi manual
 
 1. Buka `/admin.html`.
 2. Masukkan secret `ADMIN_TOKEN`.

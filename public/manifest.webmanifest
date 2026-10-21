@@ -1,0 +1,19 @@
+{
+  "name": "Pegandekan News — Berita Lokal dan Nasional",
+  "short_name": "Pegandekan News",
+  "description": "Kabar Pegandekan, Purbalingga, Jawa Tengah, dan Indonesia.",
+  "lang": "id-ID",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#c8102e",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

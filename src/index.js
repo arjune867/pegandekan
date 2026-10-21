@@ -49,7 +49,8 @@ export default {
         "/pedoman-media-siber/": "/pages/pedoman-media-siber.html",
         "/disclaimer/": "/pages/disclaimer.html",
         "/koreksi-dan-hak-jawab/": "/pages/koreksi-dan-hak-jawab.html",
-        "/sitemap/": "/pages/sitemap.html"
+        "/sitemap/": "/pages/sitemap.html",
+        "/syarat-ketentuan/": "/pages/syarat-ketentuan.html"
       };
       if (infoPages[path] && method === "GET") {
         const assetUrl = new URL(infoPages[path], request.url);

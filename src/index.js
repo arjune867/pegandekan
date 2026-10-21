@@ -42,6 +42,20 @@ export default {
         return await articlePage({ request, env, params: { slug: decodeURIComponent(article[1]) } });
       }
 
+      const infoPages = {
+        "/tentang-kami/": "/pages/tentang-kami.html",
+        "/kontak-redaksi/": "/pages/kontak-redaksi.html",
+        "/kebijakan-privasi/": "/pages/kebijakan-privasi.html",
+        "/pedoman-media-siber/": "/pages/pedoman-media-siber.html",
+        "/disclaimer/": "/pages/disclaimer.html",
+        "/koreksi-dan-hak-jawab/": "/pages/koreksi-dan-hak-jawab.html",
+        "/sitemap/": "/pages/sitemap.html"
+      };
+      if (infoPages[path] && method === "GET") {
+        const assetUrl = new URL(infoPages[path], request.url);
+        return env.ASSETS.fetch(new Request(assetUrl, request));
+      }
+
       if (path === "/sitemap.xml" && method === "GET") return await sitemap({ request, env, params: {} });
       if (path === "/robots.txt" && method === "GET") return await robots({ request, env, params: {} });
 

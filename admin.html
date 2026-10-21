@@ -13,7 +13,7 @@
 <main class="wrap">
 <div class="intro"><h1>Panel Redaksi</h1><div class="note">Kelola draf, perbarui artikel, dan terbitkan berita setelah fakta serta sumbernya diverifikasi.</div></div>
 <section class="panel">
-<h2>Keamanan akses</h2><p class="note">Token admin hanya disimpan di sesi tab browser ini. Jangan memasukkan token pada komputer bersama. Atur secret <b>ADMIN_TOKEN</b> melalui Cloudflare Pages Settings.</p>
+<h2>Keamanan akses</h2><p class="note">Token admin hanya disimpan di sesi tab browser ini. Jangan memasukkan token pada komputer bersama. Atur secret <b>ADMIN_TOKEN</b> melalui Cloudflare Workers Settings → Variables and Secrets.</p>
 <label for="token">Token admin</label><input id="token" type="password" autocomplete="current-password" placeholder="Masukkan ADMIN_TOKEN">
 <div class="actions"><button class="btn" id="connect">Hubungkan & Muat Artikel</button><button class="btn light" id="forget">Keluar / Hapus Token</button></div><div id="status" class="status" role="status" aria-live="polite">Belum terhubung.</div>
 </section>

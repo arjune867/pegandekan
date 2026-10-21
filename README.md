@@ -1,41 +1,62 @@
 # Pegandekan News
 
-Portal berita responsif dengan halaman depan, Cloudflare Pages Functions, dan Cloudflare D1 sebagai basis data artikel.
+Portal berita responsif untuk Cloudflare Workers, dengan aset statis, API berita, halaman artikel SEO, sitemap, dan panel redaksi.
 
-## Fitur portal dan redaksi
-- Halaman depan responsif: `index.html`; memuat artikel dari D1 bila database terhubung.
-- API publik: `GET /api/articles` dengan filter kategori `?category=daerah`, pencarian `?q=...`, pagination `?limit=20&offset=0`.
+## Deploy Cloudflare Workers
+
+Repository ini memakai **Cloudflare Workers**, bukan Pages. Jangan gunakan `npx wrangler pages deploy` untuk target `workers.dev`.
+
+- Worker name: `pegandekan`
+- Entry point: `src/index.js`
+- Static assets: `public/`
+- Deploy command: `npx wrangler deploy`
+- Website: `https://pegandekan.lagulawas7080.workers.dev`
+
+Di Cloudflare Workers Builds, hubungkan repository `arjune867/pegandekan`, branch `main`, lalu gunakan perintah deploy `npx wrangler deploy`. File `wrangler.toml` menentukan entry point dan folder aset.
+
+## Fitur
+
+- Halaman depan responsif di `public/index.html`.
+- Panel redaksi di `public/admin.html`.
+- API publik: `GET /api/articles` dengan filter kategori `?category=daerah`, pencarian `?q=...`, dan pagination `?limit=20&offset=0`.
 - Detail JSON: `GET /api/articles/:slug`.
-- Halaman artikel SEO: `/artikel/:slug/`, canonical URL, Open Graph, schema `NewsArticle`.
-- Panel redaksi `/admin.html`: membuat artikel, pratinjau judul/ringkasan/gambar, edit artikel, filter draf/terbit, terbitkan, kembalikan ke draf, hapus artikel.
-- API admin dilindungi bearer token dari Cloudflare Pages secret/variable `ADMIN_TOKEN`.
+- Halaman artikel SEO: `/artikel/:slug/`, canonical, Open Graph, dan schema `NewsArticle`.
+- Panel redaksi: buat, edit, draf, terbitkan, dan hapus artikel.
 - Sitemap dinamis: `/sitemap.xml`; robots: `/robots.txt`.
 - Skema database: `migrations/0001_init.sql`.
 
-## Deploy ke Cloudflare Pages
-1. Buka Cloudflare Dashboard → Workers & Pages → Create → Pages → Connect to Git.
-2. Pilih repository `arjune867/pegandekan`, branch `main`.
-3. Framework preset **None**, build command kosong, output directory `/`.
-4. Buat database D1 bernama `pegandekan-news-db`.
-5. Pada Pages project, Settings → Functions → D1 database bindings, tambahkan binding name `DB` dan arahkan ke database D1 tersebut.
-6. Jalankan SQL dari `migrations/0001_init.sql` di D1 Console.
-7. Tambahkan `ADMIN_TOKEN` sebagai secret/variable pada Pages project. Gunakan token acak panjang dan jangan commit token ke GitHub.
-8. Redeploy. Uji `/api/articles`, `/sitemap.xml`, dan `/admin.html`.
+## Aktifkan database dan admin
 
-File `wrangler.toml` masih berisi placeholder `REPLACE_WITH_YOUR_D1_DATABASE_ID`; ganti dengan ID D1 akun Anda jika memakai Wrangler. Jika menggunakan Dashboard, pastikan binding `DB` terhubung ke database yang benar.
+Deployment aset dan Worker dapat berjalan tanpa D1, tetapi API berita dan panel redaksi membutuhkan database.
 
-## Alur publikasi
-1. Buka `/admin.html` pada domain Pages yang sudah terpasang.
-2. Masukkan token `ADMIN_TOKEN`, lalu klik **Hubungkan & Muat Artikel**.
-3. Isi judul, slug, kategori, ringkasan, isi, URL gambar HTTPS, dan penulis.
-4. Pilih **Simpan sebagai draf** untuk menyimpan tanpa menerbitkan, atau **Terbitkan sekarang** setelah editor memeriksa fakta dan sumber.
-5. Pada daftar artikel, tombol **Edit** memperbarui artikel, **Terbitkan/Jadikan Draf** mengubah status, dan **Hapus** menghapus artikel secara permanen.
+1. Buat database D1 bernama `pegandekan-news-db` di Cloudflare Dashboard.
+2. Jalankan SQL pada `migrations/0001_init.sql` melalui D1 Console.
+3. Salin database ID D1. Tambahkan konfigurasi ini ke `wrangler.toml` dan ganti nilai ID dengan ID asli:
 
-## Catatan keamanan dan editorial
-- Token hanya disimpan di sessionStorage tab browser, tetapi tetap rahasia; keluar setelah selesai, khususnya pada perangkat bersama.
-- API membatasi akses tulis dengan token dan mengembalikan artikel admin tanpa cache.
-- Artikel disimpan sebagai teks biasa dan di-escape ketika dirender; jangan menambahkan rendering HTML mentah tanpa sanitasi.
-- Validasi dasar menolak URL gambar non-HTTPS, slug tidak valid, dan isi yang terlalu pendek.
-- Artikel contoh pada halaman depan adalah konten demonstrasi; jangan menerbitkannya sebagai berita faktual. Periksa fakta, sumber, tanggal, kutipan, hak foto, dan potensi konflik kepentingan.
-- Deployment ke Cloudflare belum dilakukan dari sesi ini. Repository telah diperbarui, tetapi fitur yang menggunakan D1 belum akan berjalan sampai binding dan secret dikonfigurasi.
-- Token admin adalah kontrol akses sederhana. Untuk redaksi multi-user atau akses publik yang besar, pertimbangkan autentikasi lebih kuat, audit log, rate limiting, dan proses backup D1.
+```toml
+[[d1_databases]]
+binding = "DB"
+database_name = "pegandekan-news-db"
+database_id = "MASUKKAN_D1_DATABASE_ID_ASLI"
+migrations_dir = "migrations"
+```
+
+4. Commit perubahan `wrangler.toml`, lalu deploy ulang.
+5. Atur secret `ADMIN_TOKEN` pada konfigurasi Worker di Cloudflare Dashboard (Settings → Variables and Secrets). Gunakan token acak yang panjang; jangan simpan token di GitHub.
+6. Buka `/admin.html`, masukkan token, lalu klik **Hubungkan & Muat Artikel**.
+
+Tanpa binding D1, endpoint API berita mengembalikan status 503. Tanpa secret `ADMIN_TOKEN`, panel admin tidak bisa mengelola artikel.
+
+## Alur redaksi
+
+1. Buka `/admin.html`.
+2. Masukkan secret `ADMIN_TOKEN`.
+3. Isi judul, slug, kategori, ringkasan, isi artikel, URL gambar HTTPS, dan penulis.
+4. Simpan sebagai draf atau terbitkan setelah memeriksa fakta dan sumber.
+5. Gunakan daftar artikel untuk edit, ubah status, atau hapus artikel.
+
+## Catatan
+
+- `public/index.html` dan `public/admin.html` adalah versi yang disajikan oleh Workers. Jika mengubah desain, sinkronkan file tersebut dengan `index.html` dan `admin.html` di root repository.
+- Artikel contoh di halaman depan merupakan konten demonstrasi. Ganti dengan berita yang telah diverifikasi sebelum dipublikasikan.
+- API admin memakai bearer token sederhana. Untuk redaksi multi-user, pertimbangkan autentikasi lebih kuat, rate limiting, audit log, dan backup D1.

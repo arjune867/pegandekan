@@ -1,0 +1,112 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Pegandekan News Publisher",
+    "version": "1.0.0",
+    "description": "Publikasikan artikel berita ke PEGANDEKAN NEWS. Endpoint ini langsung menerbitkan artikel. thumbnail_url harus berupa URL gambar HTTPS yang sudah dapat diakses publik."
+  },
+  "servers": [
+    {
+      "url": "https://pegandekan.lagulawas7080.workers.dev"
+    }
+  ],
+  "paths": {
+    "/api/chat/publish": {
+      "post": {
+        "operationId": "publishPegandekanNewsArticle",
+        "summary": "Terbitkan artikel berita PEGANDEKAN NEWS",
+        "description": "Gunakan hanya setelah isi artikel dan thumbnail diperiksa. Ini menerbitkan artikel langsung, bukan menyimpan sebagai draf.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "body",
+                  "thumbnail_url"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "maxLength": 180,
+                    "description": "Judul berita"
+                  },
+                  "body": {
+                    "type": "string",
+                    "minLength": 40,
+                    "description": "Isi artikel dalam HTML atau teks"
+                  },
+                  "thumbnail_url": {
+                    "type": "string",
+                    "format": "uri",
+                    "pattern": "^https://",
+                    "description": "URL gambar thumbnail HTTPS yang publik"
+                  },
+                  "excerpt": {
+                    "type": "string",
+                    "maxLength": 300,
+                    "description": "Ringkasan SEO"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "Slug URL; gunakan huruf kecil, angka, dan tanda hubung"
+                  },
+                  "category_slug": {
+                    "type": "string",
+                    "enum": [
+                      "nasional",
+                      "daerah",
+                      "politik",
+                      "ekonomi",
+                      "teknologi",
+                      "olahraga",
+                      "gaya-hidup"
+                    ]
+                  },
+                  "author": {
+                    "type": "string",
+                    "default": "Redaksi Pegandekan News"
+                  },
+                  "is_featured": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Artikel berhasil diterbitkan"
+          },
+          "400": {
+            "description": "Data artikel atau URL thumbnail tidak valid"
+          },
+          "401": {
+            "description": "Token publikasi tidak valid"
+          },
+          "503": {
+            "description": "D1 atau token belum dikonfigurasi"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "ADMIN_TOKEN"
+      }
+    }
+  }
+}

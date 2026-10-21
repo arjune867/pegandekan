@@ -1,9 +1,11 @@
-name = "pegandekan-news"
+name = "pegandekan"
+main = "src/index.js"
 compatibility_date = "2026-10-21"
-pages_build_output_dir = "."
 
-[[d1_databases]]
-binding = "DB"
-database_name = "pegandekan-news-db"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
-migrations_dir = "migrations"
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+# Setelah database D1 dibuat, tambahkan binding [[d1_databases]] di sini
+# dengan database_id yang benar. Jangan gunakan placeholder karena deployment akan gagal.

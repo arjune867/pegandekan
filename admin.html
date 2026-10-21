@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin Redaksi — Pegandekan News</title>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#17202b;background:#f3f5f8}*{box-sizing:border-box}body{margin:0}.top{background:#b5121b;color:#fff;padding:20px max(20px,calc((100% - 1000px)/2));font-weight:800}.wrap{max-width:1000px;margin:28px auto;padding:0 16px}.panel{background:#fff;border:1px solid #e0e5ec;border-radius:14px;padding:22px;margin-bottom:18px;box-shadow:0 5px 20px #17202b08}h1{font-size:24px;margin:0 0 8px}h2{font-size:18px;margin-top:0}label{display:block;font-size:13px;font-weight:700;margin:14px 0 6px}input,textarea,select{width:100%;padding:11px 12px;border:1px solid #cdd5df;border-radius:8px;font:inherit}textarea{min-height:180px;resize:vertical}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.btn{border:0;border-radius:8px;padding:11px 16px;font-weight:800;cursor:pointer;background:#b5121b;color:#fff;margin-top:14px}.btn.secondary{background:#263443}.note{font-size:13px;color:#647181;line-height:1.6}.status{padding:10px;border-radius:8px;background:#f3f5f8;margin-top:12px;white-space:pre-wrap}.article{border-top:1px solid #e4e8ee;padding:12px 0}.article strong{display:block}.pill{font-size:11px;background:#eee;padding:3px 7px;border-radius:99px}.actions{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:650px){.grid{grid-template-columns:1fr}.panel{padding:16px}}
+</style></head>
+<body><header class="top">PEGANDEKAN NEWS <span style="font-weight:500">/ Panel Redaksi</span></header>
+<main class="wrap">
+<section class="panel"><h1>Panel Admin Berita</h1><p class="note">Token disimpan hanya di sesi tab browser ini. Setel variable <b>ADMIN_TOKEN</b> di Cloudflare Pages terlebih dahulu. Jangan membagikan token kepada siapa pun.</p>
+<label for="token">Token admin</label><input id="token" type="password" autocomplete="current-password" placeholder="Masukkan ADMIN_TOKEN">
+<div class="actions"><button class="btn" id="connect">Hubungkan & Muat Artikel</button><button class="btn secondary" id="forget">Hapus Token dari Sesi</button></div><div id="status" class="status" role="status">Belum terhubung.</div></section>
+<section class="panel"><h2>Tulis Artikel</h2><form id="editor">
+<label for="title">Judul artikel *</label><input id="title" required maxlength="180" placeholder="Judul berita yang jelas dan faktual">
+<div class="grid"><div><label for="slug">Slug URL (opsional)</label><input id="slug" placeholder="otomatis-dari-judul"></div><div><label for="category">Kategori</label><select id="category"><option value="daerah">Daerah</option><option value="nasional">Nasional</option><option value="politik">Politik</option><option value="ekonomi">Ekonomi</option><option value="teknologi">Teknologi</option><option value="olahraga">Olahraga</option><option value="gaya-hidup">Gaya Hidup</option></select></div></div>
+<label for="excerpt">Ringkasan</label><textarea id="excerpt" style="min-height:80px" maxlength="300" placeholder="Ringkasan untuk halaman depan dan mesin pencari"></textarea>
+<label for="body">Isi artikel *</label><textarea id="body" required placeholder="Tulis berita dengan sumber yang dapat diverifikasi. Pisahkan paragraf dengan baris kosong."></textarea>
+<label for="image">URL gambar HTTPS</label><input id="image" type="url" placeholder="https://...">
+<div class="grid"><div><label for="author">Nama penulis</label><input id="author" value="Redaksi Pegandekan News"></div><div><label for="statusSelect">Status</label><select id="statusSelect"><option value="draft">Simpan sebagai draf</option><option value="published">Terbitkan sekarang</option></select></div></div>
+<label><input type="checkbox" id="featured" style="width:auto"> Jadikan berita unggulan</label>
+<button class="btn" type="submit">Simpan Artikel</button></form></section>
+<section class="panel"><h2>Artikel Terbaru</h2><div id="articles" class="note">Hubungkan admin untuk melihat artikel.</div></section>
+</main>
+<script>
+const $=id=>document.getElementById(id), statusBox=$('status');
+$('token').value=sessionStorage.getItem('pegandekan_admin_token')||'';
+function token(){return $('token').value.trim()}
+async function api(path,opts={}){const r=await fetch(path,{...opts,headers:{'content-type':'application/json','authorization':'Bearer '+token(),...(opts.headers||{})}});const d=await r.json().catch(()=>({error:'Respons server tidak valid'}));if(!r.ok)throw Error(d.error||'Permintaan gagal ('+r.status+')');return d}
+function slugify(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
+$('title').addEventListener('input',()=>{if(!$('slug').dataset.edited)$('slug').value=slugify($('title').value)});
+$('slug').addEventListener('input',()=>{$('slug').dataset.edited='1';$('slug').value=slugify($('slug').value)});
+async function load(){const d=await api('/api/admin/articles');$('articles').innerHTML='';if(!d.articles.length){$('articles').textContent='Belum ada artikel.';return}for(const a of d.articles){const div=document.createElement('div');div.className='article';const title=document.createElement('strong');title.textContent=a.title;const meta=document.createElement('p');meta.className='note';meta.textContent=a.slug+' · '+a.category_slug+' · '+a.status;div.append(title,meta);if(a.status==='draft'){const b=document.createElement('button');b.className='btn';b.textContent='Terbitkan';b.onclick=async()=>{try{await api('/api/admin/articles',{method:'PATCH',body:JSON.stringify({id:a.id,status:'published'})});await load();statusBox.textContent='Artikel berhasil diterbitkan.'}catch(e){statusBox.textContent=e.message}};div.append(b)}$('articles').append(div)}}
+$('connect').onclick=async()=>{try{if(!token())throw Error('Token admin wajib diisi.');sessionStorage.setItem('pegandekan_admin_token',token());await load();statusBox.textContent='Terhubung. Token aktif hanya selama sesi tab ini.'}catch(e){statusBox.textContent=e.message}};
+$('forget').onclick=()=>{sessionStorage.removeItem('pegandekan_admin_token');$('token').value='';statusBox.textContent='Token dihapus dari sesi browser.'};
+$('editor').onsubmit=async e=>{e.preventDefault();try{const d=await api('/api/admin/articles',{method:'POST',body:JSON.stringify({title:$('title').value,slug:$('slug').value,category_slug:$('category').value,excerpt:$('excerpt').value,body:$('body').value,image_url:$('image').value,author:$('author').value,status:$('statusSelect').value,is_featured:$('featured').checked})});statusBox.textContent='Artikel tersimpan sebagai '+d.status+'. Slug: '+d.slug;e.target.reset();$('author').value='Redaksi Pegandekan News';$('slug').dataset.edited='';await load()}catch(err){statusBox.textContent=err.message}};
+</script></body></html>

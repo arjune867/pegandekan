@@ -1,5 +1,6 @@
 import { onRequestGet as listArticles } from "../functions/api/articles.js";
 import { onRequestGet as getArticleJson } from "../functions/api/articles/[slug].js";
+import { onRequestPost as publishFromChat } from "../functions/api/chat/publish.js";
 import {
   onRequestGet as adminGet,
   onRequestPost as adminPost,
@@ -18,6 +19,11 @@ export default {
     try {
       if (path === "/api/articles" && method === "GET") {
         return await listArticles({ request, env, params: {} });
+      }
+
+      if (path === "/api/chat/publish") {
+        if (method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: { Allow: "POST" } });
+        return await publishFromChat({ request, env, params: {} });
       }
 
       const apiArticle = path.match(/^\/api\/articles\/([^/]+)\/?$/);

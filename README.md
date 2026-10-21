@@ -16,17 +16,19 @@ Di Cloudflare Workers Builds, hubungkan repository `arjune867/pegandekan`, branc
 
 ## Fitur
 
-- Halaman depan responsif di `public/index.html`.
+- Halaman depan responsif mobile-first di `public/index.html`, metadata SEO, Open Graph, JSON-LD, dan pencarian melalui parameter URL.
+- PWA ringan: `public/manifest.webmanifest`, Service Worker `public/sw.js`, ikon SVG, cache halaman untuk akses offline terbatas, dan prompt instalasi pada browser yang mendukung.
+- Halaman informasi: Tentang Kami, Kontak Redaksi, Kebijakan Privasi, Pedoman Media Siber, Disclaimer, Koreksi & Hak Jawab, dan Peta Situs; URL bersih diarahkan melalui Worker.
 - Panel redaksi di `public/admin.html`.
 - API publik: `GET /api/articles` dengan filter kategori `?category=daerah`, pencarian `?q=...`, dan pagination `?limit=20&offset=0`.
 - Detail JSON: `GET /api/articles/:slug`.
 - Endpoint publikasi untuk ChatGPT GPT Actions: `POST /api/chat/publish`.
 - Halaman artikel SEO: `/artikel/:slug/`, canonical, Open Graph, dan schema `NewsArticle`.
 - Panel redaksi: buat, edit, draf, terbitkan, dan hapus artikel.
-- Sitemap dinamis: `/sitemap.xml`; robots: `/robots.txt`.
+- Sitemap XML dinamis `/sitemap.xml` yang mencakup halaman kebijakan dan artikel terbit; `robots.txt` mengarahkan crawler ke sitemap.
 - Skema database: `migrations/0001_init.sql`.
 
-## Aktifkan database dan admin
+## Catatan SEO, PWA, dan kebijakan situs\n\n- Setelah deploy, uji `/manifest.webmanifest`, `/sw.js`, `/robots.txt`, `/sitemap.xml`, dan seluruh halaman informasi. Service Worker hanya menyimpan aset situs; respons API tidak dimasukkan ke cache.\n- PWA menyediakan akses offline terbatas ke halaman yang pernah dibuka dan tidak menggantikan database atau koneksi internet untuk berita baru.\n- Periksa dan sesuaikan isi Kebijakan Privasi, kontak redaksi, Pedoman Media Siber, Disclaimer, serta Koreksi & Hak Jawab dengan praktik operasional yang benar-benar diterapkan. Pastikan email redaksi aktif.\n- Konten contoh di halaman depan masih berupa demonstrasi dan harus diganti dengan artikel yang sudah diverifikasi sebelum promosi publik.\n\n## Aktifkan database dan admin
 
 Deployment aset dan Worker dapat berjalan tanpa D1, tetapi API berita dan panel redaksi membutuhkan database.
 
